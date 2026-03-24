@@ -25,26 +25,26 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql
 
-  pgadmin:
-    image: dpage/pgadmin4:9.14.0
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      MASTER_PASSWORD_REQUIRED: "False"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    configs:
-      - source: pgadmin_servers.json
-        target: /pgadmin4/servers.json
-    depends_on:
-      - postgres
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-pgadmin.rule=Host(`pgadmin.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
-      - "traefik.http.routers.edgehog-pgadmin.entrypoints=web"
-      - "traefik.http.routers.edgehog-pgadmin.service=pgadmin"
-      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+  # pgadmin:
+  #   image: dpage/pgadmin4:9.14.0
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #     MASTER_PASSWORD_REQUIRED: "False"
+  #     PGADMIN_CONFIG_SERVER_MODE: "False"
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
+  #   configs:
+  #     - source: pgadmin_servers.json
+  #       target: /pgadmin4/servers.json
+  #   depends_on:
+  #     - postgres
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.edgehog-pgadmin.rule=Host(`pgadmin.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+  #     - "traefik.http.routers.edgehog-pgadmin.entrypoints=web"
+  #     - "traefik.http.routers.edgehog-pgadmin.service=pgadmin"
+  #     - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
 
   openfga:
     image: openfga/openfga:latest
@@ -89,18 +89,18 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-          set -e
-          apk add --no-cache jq tar
-          wget -O /tmp/fga.tar.gz "https://github.com/openfga/cli/releases/download/v0.7.13/fga_0.7.13_linux_amd64.tar.gz"
-          tar -xvzf /tmp/fga.tar.gz -C /bin
-          chmod +x /bin/fga
-          fga store create --model /openfga/fga.mod --format modular --api-url 'http://openfga:8080' > /store-out
-          cat /store-out | jq -r '"export EDGEHOG_OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
-          cat /store-out | jq -r '"export EDGEHOG_OPENFGA_AUTH_MODEL_ID=\(.model.authorization_model_id)"' >> /fga-env/.env
-          cat /fga-env/.env
+        set -e
+        apk add --no-cache jq tar
+        wget -O /tmp/fga.tar.gz "https://github.com/openfga/cli/releases/download/v0.7.13/fga_0.7.13_linux_amd64.tar.gz"
+        tar -xvzf /tmp/fga.tar.gz -C /bin
+        chmod +x /bin/fga
+        fga store create --model /openfga/fga.mod --format modular --api-url 'http://openfga:8080' > /store-out
+        cat /store-out | jq -r '"export EDGEHOG_OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
+        cat /store-out | jq -r '"export EDGEHOG_OPENFGA_AUTH_MODEL_ID=\(.model.authorization_model_id)"' >> /fga-env/.env
+        cat /fga-env/.env
 
   edgehog-backend:
-    image: edgehogdevicemanager/edgehog-backend:0.12.1
+    image: docker.io/edgehogdevicemanager/edgehog-backend:0.12.1
     build:
       context: backend
     env_file: .env
@@ -122,7 +122,7 @@ services:
       EDGEHOG_FORWARDER_PORT: 80
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
       ADMIN_JWT_PUBLIC_KEY_PATH: /keys/admin_public.pem
-      EDGEHOG_AUTHZ_PROVIDER: openfga
+      # EDGEHOG_AUTHZ_PROVIDER: openfga
       EDGEHOG_OPENFGA_GRPC_ENDPOINT: openfga:8081
     restart: on-failure
     entrypoint: ["/bin/sh", "-c"]
@@ -151,7 +151,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:0.12.1
+    image: docker.io/edgehogdevicemanager/edgehog-frontend:0.12.1
     build:
       context: frontend
     environment:
@@ -187,7 +187,7 @@ services:
     environment:
       RUSTFS_ACCESS_KEY: "rustfsadmin"
       RUSTFS_SECRET_KEY: "rustfsadmin"
-      RUSTFS_CONSOLE_ENABLE: true
+      RUSTFS_CONSOLE_ENABLE: "true"
       RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS: "true"
     command: /data
     healthcheck:
@@ -220,55 +220,55 @@ services:
       exit 0;
       "
 
-  registry:
-    image: registry:3
-    restart: on-failure
-    environment:
-      REGISTRY_AUTH: htpasswd
-      REGISTRY_AUTH_HTPASSWD_REALM: Registry-Realm
-      REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.passwd
-      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
-    volumes:
-      - registry-auth:/auth
-      - registry-data:/var/lib/registry
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
-      - "traefik.http.routers.edgehog-registry.entrypoints=web"
-      - "traefik.http.routers.edgehog-registry.service=edgehog-registry"
-      - "traefik.http.services.edgehog-registry.loadbalancer.server.port=5000"
+  # registry:
+  #   image: registry:3
+  #   restart: on-failure
+  #   environment:
+  #     REGISTRY_AUTH: htpasswd
+  #     REGISTRY_AUTH_HTPASSWD_REALM: Registry-Realm
+  #     REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.passwd
+  #     REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+  #   volumes:
+  #     - registry-auth:/auth
+  #     - registry-data:/var/lib/registry
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+  #     - "traefik.http.routers.edgehog-registry.entrypoints=web"
+  #     - "traefik.http.routers.edgehog-registry.service=edgehog-registry"
+  #     - "traefik.http.services.edgehog-registry.loadbalancer.server.port=5000"
 
-  registry-auth:
-    image: httpd:2.4
-    depends_on:
-      - registry
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      "htpasswd -Bbn admin admin > /auth/registry.passwd"
-    volumes:
-      - registry-auth:/auth
+  # registry-auth:
+  #   image: httpd:2.4
+  #   depends_on:
+  #     - registry
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command: >
+  #     "htpasswd -Bbn admin admin > /auth/registry.passwd"
+  #   volumes:
+  #     - registry-auth:/auth
 
-  registry-init:
-    image: docker:29.4.3-dind
-    depends_on:
-      - registry
-    privileged: true
-    entrypoint: ["/bin/sh", "-c"]
-    command: [
-      "
-      dockerd --insecure-registry registry:5000 &
-      echo 'Waiting for Docker daemon to be ready...' &&
-      until docker info >/dev/null 2>&1; do sleep 1; done &&
-      echo 'Docker daemon ready, signing in with registry...' &&
-      echo 'admin' | docker login registry:5000 -u admin --password-stdin &&
-      echo 'Signed in with registry, pulling sample images...' &&
-      docker pull hashicorp/http-echo &&
-      echo 'Tagging sample images...' &&
-      docker tag hashicorp/http-echo registry:5000/test/http-echo &&
-      echo 'Pushing sample images...' &&
-      docker push registry:5000/test/http-echo &&
-      echo 'Images preloaded.'",
-    ]
+  # registry-init:
+  #   image: docker:29.4.3-dind
+  #   depends_on:
+  #     - registry
+  #   privileged: true
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command: [
+  #     "
+  #     dockerd --insecure-registry registry:5000 &
+  #     echo 'Waiting for Docker daemon to be ready...' &&
+  #     until docker info >/dev/null 2>&1; do sleep 1; done &&
+  #     echo 'Docker daemon ready, signing in with registry...' &&
+  #     echo 'admin' | docker login registry:5000 -u admin --password-stdin &&
+  #     echo 'Signed in with registry, pulling sample images...' &&
+  #     docker pull hashicorp/http-echo &&
+  #     echo 'Tagging sample images...' &&
+  #     docker tag hashicorp/http-echo registry:5000/test/http-echo &&
+  #     echo 'Pushing sample images...' &&
+  #     docker push registry:5000/test/http-echo &&
+  #     echo 'Images preloaded.'",
+  #   ]
 
 configs:
   pgadmin_servers.json:
