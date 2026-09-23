@@ -48,8 +48,16 @@ defmodule Edgehog.Forwarder.Session.ManualActions.GetSession do
         nil
 
       session ->
+        {:ok, jwt, _claims} =
+          Edgehog.Forwarder.Guardian.encode_and_sign(:forwarder_session, %{
+            session: session.token,
+            protocol: "http",
+            port: "8000",
+            insecure: true
+          })
+
         %Session{
-          token: session.token,
+          token: jwt,
           status: session.status,
           forwarder_hostname: session.forwarder_hostname,
           forwarder_port: session.forwarder_port,

@@ -1254,7 +1254,7 @@
     "defaultMessage": "Part Number"
   },
   "components.fleet.devices.device-info-card.DeviceInfoCard.remoteTerminal.label": {
-    "defaultMessage": "Remote Terminal"
+    "defaultMessage": "Remote WebHMI"
   },
   "components.fleet.devices.device-info-card.DeviceInfoCard.remoteTerminal.openTerminalButton": {
     "defaultMessage": "Open"

@@ -131,8 +131,9 @@ services:
       URL_SCHEME: http
       GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS: http://${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
       EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
-      EDGEHOG_FORWARDER_PORT: 4001
+      EDGEHOG_FORWARDER_PORT: 80
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
+      EDGEHOG_FORWARDER_SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
       ADMIN_JWT_PUBLIC_KEY_PATH: /keys/admin_public.pem
       EDGEHOG_AUTHZ_PROVIDER: openfga
       EDGEHOG_OPENFGA_GRPC_ENDPOINT: openfga:8081
@@ -187,12 +188,13 @@ services:
       - "traefik.http.services.edgehog-frontend.loadbalancer.server.port=80"
 
   edgehog-device-forwarder:
-    image: localhost/edgehog-device-forwarder:0.2.0
+    image: a2ac9257c51b5e2ebe53edc2109bf073f7a2ea91ec2cec86585fc099175830cc
+    pull_policy: never
     environment:
       RELEASE_NAME: edgehog-device-forwarder
       SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
       JWT_SECRET: wFJnCDGm5LtiP6FafGHWP8tukf9NmDkn7Sr7EfErG10RIoQTVux8BLP7Pl7COcSQ
-      PORT: 4001
+      PORT: 4000
       PHX_HOST: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
     restart: on-failure
     labels:
@@ -204,7 +206,7 @@ services:
       - "traefik.http.routers.https-edgehog-device-forwarder.entrypoints=websecure"
       - "traefik.http.routers.https-edgehog-device-forwarder.tls=true"
       - "traefik.http.routers.https-edgehog-device-forwarder.service=edgehog-device-forwarder"
-      - "traefik.http.services.edgehog-device-forwarder.loadbalancer.server.port=4001"
+      - "traefik.http.services.edgehog-device-forwarder.loadbalancer.server.port=4000"
 
   rustfs:
     image: rustfs/rustfs:latest

@@ -70,6 +70,10 @@ config :edgehog, :edgehog_forwarder, %{
   enabled?: forwarder_hostname != nil
 }
 
+config :edgehog_device_forwarder, Edgehog.Forwarder.Guardian,
+  issuer: "edgehog_device_forwarder",
+  secret_key: "91eUYzx2/boApWkELv8qAEciRO0kEGh7mIj6i7O9biWh/dELQZlkWJVSA0kQm27X"
+
 # Mimic production environment variables, default to phoenix defaults.
 
 # For development, we disable any cache and enable

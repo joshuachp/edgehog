@@ -37,6 +37,10 @@ config :logger, :console, format: {PrettyLog.LogfmtFormatter, :format}
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :edgehog_device_forwarder, Edgehog.Forwarder.Guardian,
+  issuer: "edgehog_device_forwarder",
+  secret_key: {System, :get_env, ["EDGEHOG_FORWARDER_SECRET_KEY_BASE"]}
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key
